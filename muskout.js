@@ -19,12 +19,13 @@
 		this.preprocessTextNode = function(node) {
 
 			var nodes = [];
-			find_expressions(node.nodeValue).forEach(function(expr) {
-				var node = create_node(expr);
+			var exprs = find_expressions(node.nodeValue);
+			exprs.forEach(function(e) {
+				var node = create_node(e);
 				if (node) {
 					nodes.push(node);
 				} else {
-					nodes.push(document.createComment("ko text: " + expr));
+					nodes.push(document.createComment("ko text: " + e.expr));
 					nodes.push(document.createComment("/ko"));
 				}
 			});
@@ -35,8 +36,6 @@
 				}
 				node.parentNode.removeChild(node);
 			}
-
-			return nodes;
 		};
 
 		this.preprocessElementNode = function( node ) {
@@ -88,6 +87,10 @@
 			}
 
 			list.push({expr: match[1]});
+		}
+
+		if (!list.length) {
+			return [];
 		}
 
 		// preserve trailing text
