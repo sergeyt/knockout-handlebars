@@ -1,61 +1,42 @@
 (function(){
 
-	// custom binding provider with support of mustache '{{ }}' blocks
-	ko.bindingProvider.instance.preprocessNode = function(node) {
-		switch (node.nodeType) {
-			// element
-			case 1:
-				return preprocessElementNode(node);
-			// text node
-			case 3:
-				return preprocessTextNode(node);
-		}
-	};
-
-	function preprocessTextNode(node) {
-
-		var nodes = [];
-		var exprs = find_expressions(node.nodeValue);
-		exprs.forEach(function(e) {
-			var node = create_node(e);
-			if (node) {
-				nodes.push(node);
-			} else {
-				nodes.push(document.createComment("ko text: " + e.expr));
-				nodes.push(document.createComment("/ko"));
-			}
-		});
-
-		if (nodes) {
-			for (var i = 0; i < nodes.length; i++) {
-				node.parentNode.insertBefore(nodes[i], node);
-			}
-			node.parentNode.removeChild(node);
-		}
-	}
-
-	function preprocessElementNode(node) {
-
-		var bindings = node.attributes['data-bind'] || '';
-		var attrBindings = process_attrs(node);
-
-		if (bindings && attrBindings) {
-			bindings += ', ';
-		}
-
-		bindings += attrBindings;
-
-		if (bindings) {
-			node.setAttribute('data-bind', bindings);
-			console.log(node, bindings);
-		}
-	}
-
 	// shims
 	if (!String.prototype.trim) {
 		String.prototype.trim = function(){
 			return this.replace(/^\s+|\s+$/g, "");
 		};
+	}
+
+	function process_text(node) {
+		if (node.nodeType === 3 && node.nodeValue && node.nodeValue.indexOf('{{') !== -1) {
+			var nodes = find_expressions(node.nodeValue).map(create_node);
+			if (nodes.length) {
+				if (node.parentNode) {
+					for (var i = 0; i < nodes.length; i++) {
+						node.parentNode.insertBefore(nodes[i], node);
+					}
+					node.parentNode.removeChild(node);
+				}
+				return nodes;
+			}
+		}
+	}
+
+	function process_attrs(node) {
+		if (node.nodeType === 1 && node.attributes && node.attributes.length) {
+
+			var dataBind = node.attributes['data-bind'] || '';
+			var attrBindings = get_attr_bindings(node).join(', ');
+
+			if (dataBind && attrBindings) {
+				dataBind += ', ';
+			}
+			dataBind += attrBindings;
+
+			if (dataBind) {
+				node.setAttribute('data-bind', dataBind);
+			}
+		}
 	}
 
 	var mustacheRegex = /{{([\s\S]*?)}}/g;
@@ -96,14 +77,12 @@
 	function commentFn(keyword, prefix) {
 		return function(expr){
 			expr = expr.substr(prefix.length).trim();
-			return document.createComment("ko " + keyword + ": ", expr);
+			return document.createComment(" ko " + keyword + ": " + expr + " ");
 		};
 	}
 
+	// handlebars helpers
 	var expr_map = {
-		'#': 'foreach',
-		'^': 'ifnot',
-		// handlebars helpers
 		'#each': 'foreach',
 		'#if': 'if',
 		'#unless': 'ifnot',
@@ -139,7 +118,13 @@
 
 		prefix = expr.charAt(0);
 		var fn = expr_map[prefix];
-		return fn ? fn(expr) : null;
+		if (fn) {
+			return fn(expr);
+		}
+
+		var span = document.createElement('span');
+		span.setAttribute('data-bind', 'text: ' + expr);
+		return span;
 	}
 
 	var bindingMap = {
@@ -148,55 +133,67 @@
 		'checked': 'checked'
 	};
 
-	function attr_fn(list) {
-		var expr = list.map(function(e){
-			if (typeof e == 'string') {
-				return "'" + e + "'";
-			}
-			return "(" + e.expr + ")";
-		}).join(' + ');
-		return '(function(){ return ' + expr + '; })()';
+	function create_attr_binding(e) {
+		if (typeof e == 'string') {
+			return '"' + e.replace(/"/g, '\\"') + '"';
+		}
+		return 'ko.unwrap(' + e.expr + ')';
 	}
 
-	function process_attrs(node){
+	function get_attr_bindings(node) {
 
-		var attrs = node.attributes,
-			toRemove = [],
-			attrBindings = '',
-			bindings = '',
-			i;
+		var attrBinding = [];
+		var bindings = [];
 
-		for (i = 0; i < attrs.length; i++) {
-			var attr = attrs[i];
-			var exprs = find_expressions(attr.value);
-			if (exprs.length) {
+		for (var i = node.attributes.length - 1; i >= 0; i--) {
+			var attr = node.attributes[i];
+			if (attr.specified && attr.name != 'data-bind' && attr.value.indexOf('{{') !== -1) {
+				var parts = find_expressions(attr.value).map(create_attr_binding);
+				var binding = '""+' + parts.join('+');
+
 				var name = bindingMap[attr.name] || 'attr';
-				var expr = attr_fn(exprs);
-				toRemove.push(attr);
-
 				if (name == 'attr') {
-					if (!attrBindings) {
-						attrBindings = "attr: {";
-					}
-					attrBindings += ", '" + name + "': " + expr;
+					attrBinding.push(attr.name + ':' + binding);
 				} else {
-					if (bindings) {
-						bindings += ", ";
-					}
-					bindings += name + ': ' + expr;
+					bindings.push(name + ':' + binding);
 				}
 			}
 		}
 
-		for (i = 0; i < toRemove.length; i++) {
-			node.removeAttribute(toRemove[i]);
+		if (attrBinding.length) {
+			bindings.push('attr:{' + attrBinding.join(', ') + '}');
 		}
 
-		if (bindings && attrBindings) {
-			bindings += ', ';
-		}
-
-		return bindings + attrBindings;
+		return bindings;
 	}
+
+	// infect knockout
+	var provider = ko.bindingProvider.instance;
+
+	provider.preprocessNode = function process_node(node) {
+		switch (node.nodeType) {
+			case 1:
+				return process_attrs(node);
+			case 3:
+				return process_text(node);
+		}
+	};
+
+	function attrs_has_bindings(node) {
+		if (node.nodeType == 1 && node.attributes) {
+			for (var i = 0; i < node.attributes.length; i++) {
+				var attr = node.attributes[i];
+				if (attr.specified && attr.value.indexOf('{{') !== -1) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	var ko_nodeHasBindings = provider.nodeHasBindings;
+	provider.nodeHasBindings = function(node) {
+		return ko_nodeHasBindings.call(provider, node) || attrs_has_bindings(node);
+	};
 
 })();
