@@ -33,7 +33,7 @@ describe 'muskout', ->
 <div class="test">
 {{#each items}}
 <span class="item">{{name}}</span>
-{{/items}}
+{{/each}}
 </div>
 """
 		vm =
@@ -70,3 +70,19 @@ describe 'muskout', ->
 
 		run false
 		run true
+
+	it 'should process {{#with expr}}', ->
+		template """
+<div class="test">
+{{#with item}}
+<span class="item">{{name}}</span>
+{{/with}}
+</div>
+"""
+		vm =
+			item: {
+				name: 'test'
+			}
+		ko.applyBindings(vm)
+
+		$('.item').text().should.eql('test')
