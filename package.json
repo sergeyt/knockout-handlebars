@@ -1,6 +1,6 @@
 {
   "name": "muskout.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Handlebars syntax sugar for knockout.js",
   "license": "MIT",
   "main": "mockout.js",
