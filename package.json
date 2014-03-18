@@ -1,7 +1,7 @@
 {
   "name": "muskout.js",
   "version": "0.0.2",
-  "description": "Use mustache, handlebars templates with knockout.js",
+  "description": "Handlebars syntax sugar for knockout.js",
   "license": "MIT",
   "main": "mockout.js",
   "repository": {

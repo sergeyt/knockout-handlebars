@@ -1,6 +1,8 @@
 describe 'muskout', ->
 
 	beforeEach ->
+		div = $('.test')
+		ko.cleanNode(div[0]) if div.length
 		div = $('#sandbox')
 		$('<div id="sandbox"></div>').appendTo($('body')) unless div.length
 		div.html('')
@@ -10,7 +12,7 @@ describe 'muskout', ->
 		$(template).appendTo($('#sandbox'))
 
 		vm = {value: 'test'}
-		ko.applyBindings(vm)
+		ko.applyBindings(vm, $('.test')[0])
 
 		$('.test').text().should.eql('test')
 
@@ -19,6 +21,6 @@ describe 'muskout', ->
 		$(template).appendTo($('#sandbox'))
 
 		vm = {value: 'green'}
-		ko.applyBindings(vm)
+		ko.applyBindings(vm, $('.test')[0])
 
 		$('.test').hasClass('green').should.be.ok

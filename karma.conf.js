@@ -1,4 +1,19 @@
 module.exports = function(config) {
+
+	var debug = config.debug;
+
+	var preprocessors = {
+		'test/*.coffee': 'coffee'
+	};
+
+	if (!debug) {
+		preprocessors['muskout.js'] = 'coverage';
+	}
+
+	var knockout = debug ?
+		'node_modules/knockout/build/output/knockout-latest.debug.js'
+		: 'node_modules/knockout/build/output/knockout-latest.js';
+
 	config.set({
 		// base path, that will be used to resolve files and exclude
 		basePath: '',
@@ -12,15 +27,12 @@ module.exports = function(config) {
 			}
 		},
 
-		preprocessors: {
-			'muskout.js': 'coverage',
-			'test/*.coffee': 'coffee'
-		},
+		preprocessors: preprocessors,
 
 		// list of files / patterns to load in the browser
 		files: [
 			'node_modules/jquery/dist/jquery.js',
-			'node_modules/knockout/build/output/knockout-latest.js',
+			knockout,
 			'node_modules/should/should.js',
 			'muskout.js',
 			'test/*.coffee'

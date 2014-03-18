@@ -1,64 +1,55 @@
 (function(){
 
 	// custom binding provider with support of mustache '{{ }}' blocks
-	var bindingProvider = function () {
-		var self = this;
-		this.constructor = bindingProvider;
-
-		this.preprocessNode = function(node) {
-			switch (node.nodeType) {
-				// element
-				case 1:
-					return self.preprocessElementNode(node);
-				// text node
-				case 3:
-					return self.preprocessTextNode(node);
-			}
-		};
-
-		this.preprocessTextNode = function(node) {
-
-			var nodes = [];
-			var exprs = find_expressions(node.nodeValue);
-			exprs.forEach(function(e) {
-				var node = create_node(e);
-				if (node) {
-					nodes.push(node);
-				} else {
-					nodes.push(document.createComment("ko text: " + e.expr));
-					nodes.push(document.createComment("/ko"));
-				}
-			});
-
-			if (nodes) {
-				for (var i = 0; i < nodes.length; i++) {
-					node.parentNode.insertBefore(nodes[i], node);
-				}
-				node.parentNode.removeChild(node);
-			}
-		};
-
-		this.preprocessElementNode = function( node ) {
-
-			var bindings = node.attributes['data-bind'] || '';
-			var attrBindings = process_attrs(node);
-
-			if (bindings && attrBindings) {
-				bindings += ', ';
-			}
-
-			bindings += attrBindings;
-
-			if (bindings) {
-				node.setAttribute('data-bind', bindings);
-				console.log(node, bindings);
-			}
-		};
+	ko.bindingProvider.instance.preprocessNode = function(node) {
+		switch (node.nodeType) {
+			// element
+			case 1:
+				return preprocessElementNode(node);
+			// text node
+			case 3:
+				return preprocessTextNode(node);
+		}
 	};
 
-	bindingProvider.prototype = ko.bindingProvider.instance;
+	function preprocessTextNode(node) {
 
-	ko.bindingProvider.instance = new bindingProvider();
+		var nodes = [];
+		var exprs = find_expressions(node.nodeValue);
+		exprs.forEach(function(e) {
+			var node = create_node(e);
+			if (node) {
+				nodes.push(node);
+			} else {
+				nodes.push(document.createComment("ko text: " + e.expr));
+				nodes.push(document.createComment("/ko"));
+			}
+		});
+
+		if (nodes) {
+			for (var i = 0; i < nodes.length; i++) {
+				node.parentNode.insertBefore(nodes[i], node);
+			}
+			node.parentNode.removeChild(node);
+		}
+	}
+
+	function preprocessElementNode(node) {
+
+		var bindings = node.attributes['data-bind'] || '';
+		var attrBindings = process_attrs(node);
+
+		if (bindings && attrBindings) {
+			bindings += ', ';
+		}
+
+		bindings += attrBindings;
+
+		if (bindings) {
+			node.setAttribute('data-bind', bindings);
+			console.log(node, bindings);
+		}
+	}
 
 	// shims
 	if (!String.prototype.trim) {

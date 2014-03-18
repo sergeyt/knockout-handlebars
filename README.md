@@ -6,7 +6,7 @@
 
 # muskout.js
 
-Use mustache, handlebars templates with knockout.js
+Handlebars syntax sugar for knockout.js
 
 [![NPM version](https://badge.fury.io/js/muskout.js.png)](http://badge.fury.io/js/muskout.js)
 

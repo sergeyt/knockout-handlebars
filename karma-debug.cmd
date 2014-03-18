@@ -1,1 +1,1 @@
-start karma start karma.conf.js --browsers Chrome
+start karma start karma.conf.debug.js
