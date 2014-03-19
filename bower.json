@@ -1,0 +1,18 @@
+{
+  "name": "muskout.js",
+  "version": "0.0.3",
+  "main": "muskout.js",
+  "maintainers": [{
+    "name": "Sergey Todyshev",
+    "email": "stodyshev@gmail.com"
+  }],
+  "dependencies": {
+    "jquery": "~2.0",
+    "knockout": "~3.0"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ]
+}
