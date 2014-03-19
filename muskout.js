@@ -7,18 +7,59 @@
 		};
 	}
 
-	function process_text(node) {
-		if (node.nodeType === 3 && node.nodeValue && node.nodeValue.indexOf('{{') !== -1) {
-			var nodes = find_expressions(node.nodeValue).map(create_node);
-			if (nodes.length) {
-				if (node.parentNode) {
-					for (var i = 0; i < nodes.length; i++) {
-						node.parentNode.insertBefore(nodes[i], node);
-					}
-					node.parentNode.removeChild(node);
-				}
-				return nodes;
+	// https://github.com/mbest/knockout.punches
+	// Performance comparison at http://jsperf.com/markup-interpolation-comparison
+	function parseInterpolationMarkup(textToParse, outerTextCallback, expressionCallback) {
+		function innerParse(text) {
+			var innerMatch = text.match(/^([\s\S]*?)}}([\s\S]*)\{\{([\s\S]*)$/);
+			if (innerMatch) {
+				expressionCallback(innerMatch[1]);
+				outerParse(innerMatch[2]);
+				expressionCallback(innerMatch[3]);
+			} else {
+				expressionCallback(text);
 			}
+		}
+		function outerParse(text) {
+			var outerMatch = text.match(/^([\s\S]*?)\{\{([\s\S]*)}}([\s\S]*)$/);
+			if (outerMatch) {
+				outerTextCallback(outerMatch[1]);
+				innerParse(outerMatch[2]);
+				outerTextCallback(outerMatch[3]);
+			} else {
+				outerTextCallback(text);
+			}
+		}
+		outerParse(textToParse);
+	}
+
+	function interpolateMarkup(node) {
+
+		// only needs to work with text nodes
+		if (!(node.nodeType === 3 && node.nodeValue && node.nodeValue.indexOf('{{') !== -1)) {
+			return;
+		}
+
+		var nodes = [];
+		function addTextNode(text) {
+			if (text)
+				nodes.push(document.createTextNode(text));
+		}
+		function wrapExpr(expressionText) {
+			if (expressionText)
+				nodes.push(create_expression_node(expressionText));
+		}
+
+		parseInterpolationMarkup(node.nodeValue, addTextNode, wrapExpr);
+
+		if (nodes.length) {
+			if (node.parentNode) {
+				for (var i = 0; i < nodes.length; i++) {
+					node.parentNode.insertBefore(nodes[i], node);
+				}
+				node.parentNode.removeChild(node);
+			}
+			return nodes;
 		}
 	}
 
@@ -38,41 +79,6 @@
 				node.setAttribute('data-bind', dataBind);
 			}
 		}
-	}
-
-	var mustacheRegex = /{{([\s\S]*?)}}/g;
-
-	// finds all mustache expressions
-	function find_expressions(text) {
-		if (!text) return [];
-
-		var start = mustacheRegex.lastIndex = 0, str;
-		var list = [];
-		var match;
-
-		while ((match = mustacheRegex.exec(text))) {
-			str = text.substring(start, match.index);
-			start = mustacheRegex.lastIndex;
-
-			// preserve text between expressions
-			if (str) {
-				list.push(str);
-			}
-
-			list.push({expr: match[1]});
-		}
-
-		if (!list.length) {
-			return [];
-		}
-
-		// preserve trailing text
-		str = text.substring(start);
-		if (str) {
-			list.push(str);
-		}
-
-		return list;
 	}
 
 	function commentFn(keyword, prefix) {
@@ -100,12 +106,8 @@
 		return document.createComment("/ko");
 	};
 
-	function create_node(expr) {
-		if (typeof expr == 'string') {
-			return document.createTextNode(expr);
-		}
-
-		expr = expr.expr;
+	function create_expression_node(expr) {
+		
 		var prefix, fn;
 		var i = expr.indexOf(' ');
 		if (i >= 0) {
@@ -133,30 +135,41 @@
 		'checked': 'checked'
 	};
 
-	function create_attr_binding(e) {
-		if (typeof e == 'string') {
-			return '"' + e.replace(/"/g, '\\"') + '"';
-		}
-		return 'ko.unwrap(' + e.expr + ')';
-	}
-
 	function get_attr_bindings(node) {
 
 		var attrBinding = [];
 		var bindings = [];
 
+		function process_attr(attribute) {
+
+			var parts = [];
+			function addText(text) {
+				if (text)
+					parts.push('"' + text.replace(/"/g, '\\"') + '"');
+			}
+			function addExpr(expressionText) {
+				if (expressionText) {
+					parts.push('ko.unwrap(' + expressionText + ')');
+				}
+			}
+
+			parseInterpolationMarkup(attribute.value, addText, addExpr);
+
+			var binding = '""+' + parts.join('+');
+
+			var name = bindingMap[attribute.name] || 'attr';
+			if (name == 'attr') {
+				attrBinding.push(attribute.name + ':' + binding);
+			} else {
+				bindings.push(name + ':' + binding);
+			}
+		}
+
 		for (var i = node.attributes.length - 1; i >= 0; i--) {
 			var attr = node.attributes[i];
 			if (attr.specified && attr.name != 'data-bind' && attr.value.indexOf('{{') !== -1) {
-				var parts = find_expressions(attr.value).map(create_attr_binding);
-				var binding = '""+' + parts.join('+');
 
-				var name = bindingMap[attr.name] || 'attr';
-				if (name == 'attr') {
-					attrBinding.push(attr.name + ':' + binding);
-				} else {
-					bindings.push(name + ':' + binding);
-				}
+				process_attr(attr);
 			}
 		}
 
@@ -175,7 +188,7 @@
 			case 1:
 				return process_attrs(node);
 			case 3:
-				return process_text(node);
+				return interpolateMarkup(node);
 		}
 	};
 
