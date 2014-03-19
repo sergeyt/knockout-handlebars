@@ -99,25 +99,24 @@
 		return document.createComment("/ko");
 	};
 
-	var helpers = ['#each', '#if', '#unless', '#with'];
-
 	function create_node(expr) {
 		if (typeof expr == 'string') {
 			return document.createTextNode(expr);
 		}
 
 		expr = expr.expr;
-		var prefix;
-
-		for (var i = 0; i < helpers.length; i++) {
-			prefix = helpers[i];
-			if (expr.indexOf(prefix) === 0) {
-				return expr_map[prefix](expr);
+		var prefix, fn;
+		var i = expr.indexOf(' ');
+		if (i >= 0) {
+			prefix = expr.substr(0, i);
+			fn = expr_map[prefix];
+			if (fn) {
+				return fn(expr);
 			}
 		}
 
 		prefix = expr.charAt(0);
-		var fn = expr_map[prefix];
+		fn = expr_map[prefix];
 		if (fn) {
 			return fn(expr);
 		}
