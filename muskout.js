@@ -25,7 +25,8 @@
 	function process_attrs(node) {
 		if (node.nodeType === 1 && node.attributes && node.attributes.length) {
 
-			var dataBind = node.attributes['data-bind'] || '';
+			var attr = node.attributes['data-bind'];
+			var dataBind = attr ? attr.value : '';
 			var attrBindings = get_attr_bindings(node).join(', ');
 
 			if (dataBind && attrBindings) {
