@@ -149,13 +149,17 @@
 			}
 			function addExpr(expressionText) {
 				if (expressionText) {
-					parts.push('ko.unwrap(' + expressionText + ')');
+					parts.push(expressionText);
 				}
 			}
 
 			parseInterpolationMarkup(attribute.value, addText, addExpr);
 
-			var binding = '""+' + parts.join('+');
+			if (!parts.length) {
+				return false;
+			}
+
+			var binding = parts.join('+');
 
 			var name = bindingMap[attribute.name] || 'attr';
 			if (name == 'attr') {
@@ -163,13 +167,16 @@
 			} else {
 				bindings.push(name + ':' + binding);
 			}
+
+			return true;
 		}
 
 		for (var i = node.attributes.length - 1; i >= 0; i--) {
 			var attr = node.attributes[i];
-			if (attr.specified && attr.name != 'data-bind' && attr.value.indexOf('{{') !== -1) {
-
-				process_attr(attr);
+			if (attr.name != 'data-bind' && attr.value.indexOf('{{') !== -1) {
+				if (process_attr(attr)) {
+					node.removeAttribute(attr.name);
+				}
 			}
 		}
 
@@ -196,7 +203,7 @@
 		if (node.nodeType == 1 && node.attributes) {
 			for (var i = 0; i < node.attributes.length; i++) {
 				var attr = node.attributes[i];
-				if (attr.specified && attr.value.indexOf('{{') !== -1) {
+				if (attr.value && attr.value.indexOf('{{') !== -1) {
 					return true;
 				}
 			}
