@@ -1,6 +1,6 @@
 {
   "name": "knockout-handlebars",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "knockout.handlebars.js",
   "maintainers": [{
     "name": "Sergey Todyshev",
