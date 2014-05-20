@@ -1,6 +1,6 @@
 {
   "name": "knockout-handlebars",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Handlebars syntax sugar for knockout.js",
   "license": "MIT",
   "main": "knockout.handlebars.js",
