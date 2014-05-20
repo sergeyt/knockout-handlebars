@@ -1,12 +1,12 @@
 {
-  "name": "muskout.js",
+  "name": "knockout-handlebars",
   "version": "0.0.3",
   "description": "Handlebars syntax sugar for knockout.js",
   "license": "MIT",
-  "main": "mockout.js",
+  "main": "knockout.handlebars.js",
   "repository": {
     "type": "git",
-    "url": "git@github.com:sergeyt/jquery-bootswatch.git"
+    "url": "git@github.com:sergeyt/knockout-handlebars.git"
   },
   "keywords": [
     "knockout",

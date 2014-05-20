@@ -34,7 +34,7 @@ module.exports = function(config) {
 			'node_modules/jquery/dist/jquery.js',
 			knockout,
 			'node_modules/should/should.js',
-			'muskout.js',
+			'knockout.handlebars.js',
 			'test/*.coffee'
 		],
 
