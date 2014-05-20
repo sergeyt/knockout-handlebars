@@ -1,4 +1,4 @@
-describe 'muskout', ->
+describe 'it', ->
 
 	init = ->
 		ko.cleanNode(document.body)
