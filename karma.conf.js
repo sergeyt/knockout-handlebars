@@ -1,5 +1,6 @@
 module.exports = function(config) {
 
+	var pkg = require('./package.json');
 	var debug = config.debug;
 
 	var preprocessors = {
@@ -7,7 +8,7 @@ module.exports = function(config) {
 	};
 
 	if (!debug) {
-		preprocessors['muskout.js'] = 'coverage';
+		preprocessors[pkg.main] = 'coverage';
 	}
 
 	var knockout = debug ?
@@ -34,7 +35,7 @@ module.exports = function(config) {
 			'node_modules/jquery/dist/jquery.js',
 			knockout,
 			'node_modules/should/should.js',
-			'knockout.handlebars.js',
+			pkg.main,
 			'test/*.coffee'
 		],
 
