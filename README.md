@@ -3,6 +3,7 @@
                                                                                  
 [![Deps Status](https://david-dm.org/sergeyt/knockout-handlebars.png)](https://david-dm.org/sergeyt/knockout-handlebars)
 [![DevDeps Status](https://david-dm.org/sergeyt/knockout-handlebars/dev-status.png)](https://david-dm.org/sergeyt/knockout-handlebars#info=devDependencies)
+[![Dependency Status](https://gemnasium.com/sergeyt/knockout-handlebars.svg)](https://gemnasium.com/sergeyt/knockout-handlebars)
 
 # knockout-handlebars
 

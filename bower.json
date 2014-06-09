@@ -7,8 +7,8 @@
     "email": "stodyshev@gmail.com"
   }],
   "dependencies": {
-    "jquery": "~2.0",
-    "knockout": "~3.0"
+    "jquery": "~2.1",
+    "knockout": "~3.1"
   },
   "ignore": [
     "**/.*",

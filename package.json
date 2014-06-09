@@ -24,7 +24,7 @@
     "grunt": "~0.4",
     "grunt-contrib-jshint": "~0.10",
     "grunt-npm": "~0.0.2",
-    "grunt-bump": "~0.0.13",
+    "grunt-bump": "~0.0.14",
     "grunt-auto-release": "~0.0.6",
     "grunt-cli": "~0.1",
     "karma-chrome-launcher": "~0.1",
@@ -35,7 +35,7 @@
     "karma-coverage": "~0.2",
     "karma-mocha": "~0.1",
     "grunt-karma": "~0.8",
-    "should": "~3.3"
+    "should": "~4.0"
   },
   "scripts": {
     "lint": "grunt lint",
