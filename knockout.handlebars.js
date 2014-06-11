@@ -1,3 +1,9 @@
+/*
+ * knockout-handlebars.js v0.0.4 - handlebars and more syntax sugar for knockout.js
+ * https://github.com/sergeyt/knockout-handlebars
+ * Licensed under MIT (https://github.com/sergeyt/knockout-handlebars/blob/master/LICENSE)
+ */
+
 (function(){
 
 	// shims
