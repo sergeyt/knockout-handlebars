@@ -12,6 +12,11 @@
 			return this.replace(/^\s+|\s+$/g, "");
 		};
 	}
+	if (!String.prototype.startsWith) {
+		String.prototype.startsWith = function(prefix){
+			return this.indexOf(prefix) === 0;
+		};
+	}
 
 	// https://github.com/mbest/knockout.punches
 	// Performance comparison at http://jsperf.com/markup-interpolation-comparison
@@ -138,6 +143,9 @@
 	var bindingMap = {
 		'value': 'value',
 		'disabled': 'disable',
+		'disable': 'disable',
+		'enabled': 'enable',
+		'enable': 'enable',
 		'checked': 'checked'
 	};
 
@@ -179,7 +187,11 @@
 
 		for (var i = node.attributes.length - 1; i >= 0; i--) {
 			var attr = node.attributes[i];
-			if (attr.name != 'data-bind' && attr.value.indexOf('{{') !== -1) {
+			if (attr.name == 'data-bind') continue;
+			if (attr.name.startsWith('ko-')) {
+				var name = attr.name.substr(3);
+				bindings.push(name + ':' + attr.value);
+			} else if (attr.value.indexOf('{{') >= 0) {
 				if (process_attr(attr)) {
 					node.removeAttribute(attr.name);
 				}
@@ -209,7 +221,9 @@
 		if (node.nodeType == 1 && node.attributes) {
 			for (var i = 0; i < node.attributes.length; i++) {
 				var attr = node.attributes[i];
-				if (attr.value && attr.value.indexOf('{{') !== -1) {
+				if (attr.name == 'data-bind' ||
+					attr.name.startsWith('ko-') ||
+					attr.value.indexOf('{{') >= 0) {
 					return true;
 				}
 			}
