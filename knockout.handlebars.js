@@ -191,6 +191,7 @@
 			if (attr.name.startsWith('ko-')) {
 				var name = attr.name.substr(3);
 				bindings.push(name + ':' + attr.value);
+				node.removeAttribute(attr.name);
 			} else if (attr.value.indexOf('{{') >= 0) {
 				if (process_attr(attr)) {
 					node.removeAttribute(attr.name);

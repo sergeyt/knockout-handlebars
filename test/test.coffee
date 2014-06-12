@@ -27,6 +27,7 @@ describe 'ko.handlebars', ->
 		e = $ '.test'
 		e.val().should.eql 'test text'
 		e.hasClass('error').should.be.ok
+		e.is('[value]').should.be.false
 
 	it 'should replace ko- attribute', ->
 		template '<input class="test" ko-value="value"/>'
@@ -37,6 +38,7 @@ describe 'ko.handlebars', ->
 		e = $ '.test'
 		e.val().should.eql 'test'
 		e.attr('data-bind').should.eql 'value:value'
+		e.is('[ko-value]').should.be.false
 
 	it 'should process {{#each expr}}', ->
 		template """
