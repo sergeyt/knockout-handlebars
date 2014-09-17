@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "jquery": "~2.1.0",
-    "knockout": "~3.1.0"
+    "knockout": "~3.2.0"
   },
   "devDependencies": {
     "grunt": "~0.4",
@@ -34,7 +34,7 @@
     "karma": "~0.12",
     "karma-coverage": "~0.2",
     "karma-mocha": "~0.1",
-    "grunt-karma": "~0.8",
+    "grunt-karma": "~0.9",
     "should": "~4.0"
   },
   "scripts": {
