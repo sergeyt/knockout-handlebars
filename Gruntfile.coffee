@@ -1,8 +1,30 @@
 module.exports = (grunt) ->
 
-  # Project configuration.
+	# load grunt plugins
+	plugins = [
+		'grunt-contrib-jshint',
+		'grunt-npm',
+		'grunt-bump',
+		'grunt-auto-release',
+		'grunt-karma',
+		'grunt-contrib-uglify'
+	]
+
+	for name in plugins
+		grunt.loadNpmTasks name
+
+	pkg = grunt.file.readJSON 'package.json'
+
+	banner = """/*
+ * <%= pkg.name %>.js v<%= pkg.version %> - handlebars and more syntax sugar for knockout.js
+ * https://github.com/sergeyt/knockout-handlebars
+ * Licensed under MIT (https://github.com/sergeyt/knockout-handlebars/blob/master/LICENSE)
+ */
+ """
+
+  	# Project configuration.
 	grunt.initConfig
-		pkgFile: 'package.json'
+		pkg: pkg
 
 		'npm-contributors':
 			options:
@@ -36,11 +58,14 @@ module.exports = (grunt) ->
 				configFile: 'karma.conf.js'
 				singleRun: true
 
-	grunt.loadNpmTasks 'grunt-contrib-jshint'
-	grunt.loadNpmTasks 'grunt-npm'
-	grunt.loadNpmTasks 'grunt-bump'
-	grunt.loadNpmTasks 'grunt-auto-release'
-	grunt.loadNpmTasks 'grunt-karma'
+		uglify:
+			min:
+				options:
+					banner: banner + '\n\n'
+					mangle: false
+				files:
+					'dist/knockout.handlebars.min.js': 'knockout.handlebars.js'
+	
 
 	grunt.registerTask 'release', 'Bump the version and publish to NPM.',
 		(type) -> grunt.task.run [
@@ -49,7 +74,7 @@ module.exports = (grunt) ->
 			'npm-publish'
 		]
 
+	# meta tasks
 	grunt.registerTask 'lint', ['jshint']
 	grunt.registerTask 'test', ['lint', 'karma']
-	grunt.registerTask 'default', ['test']
-
+	grunt.registerTask 'default', ['test', 'uglify']

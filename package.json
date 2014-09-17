@@ -35,7 +35,8 @@
     "karma-coverage": "~0.2",
     "karma-mocha": "~0.1",
     "grunt-karma": "~0.9",
-    "should": "~4.0"
+    "should": "~4.0",
+    "grunt-contrib-uglify": "~0.5"
   },
   "scripts": {
     "lint": "grunt lint",
