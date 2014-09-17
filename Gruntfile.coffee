@@ -2,11 +2,12 @@ module.exports = (grunt) ->
 
 	# load grunt plugins
 	plugins = [
-		'grunt-contrib-jshint',
-		'grunt-npm',
-		'grunt-bump',
-		'grunt-auto-release',
-		'grunt-karma',
+		'grunt-contrib-jshint'
+		'grunt-coffeelint'
+		'grunt-npm'
+		'grunt-bump'
+		'grunt-auto-release'
+		'grunt-karma'
 		'grunt-contrib-uglify'
 	]
 
@@ -53,6 +54,15 @@ module.exports = (grunt) ->
 					ignores: ['*.min.js', 'src/*.min.js']
 				src: ['*.js', 'src/*.js']
 
+		coffeelint:
+			options:
+				no_tabs: {level: 'ignore'}
+				indentation: {level: 'ignore'}
+				max_line_length:
+					level: 'error'
+					value: 110
+			all: ['*.coffee', 'test/*.coffee']
+
 		karma:
 			unit:
 				configFile: 'karma.conf.js'
@@ -75,6 +85,6 @@ module.exports = (grunt) ->
 		]
 
 	# meta tasks
-	grunt.registerTask 'lint', ['jshint']
+	grunt.registerTask 'lint', ['jshint', 'coffeelint']
 	grunt.registerTask 'test', ['lint', 'karma']
 	grunt.registerTask 'default', ['test', 'uglify']
